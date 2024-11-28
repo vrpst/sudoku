@@ -28,6 +28,7 @@ class Solve:
         self.matrixPrint(self.__hypo_matrix)
         print("\n")
         self.matrixPrint(self.__matrix)
+        GUI(self.__starting_matrix, self.__matrix, self.__hypo_matrix,)
 
     def matrixPrint(self, inp):
         for i in inp:
@@ -123,6 +124,91 @@ class Solve:
                                 for by3 in range(3):
                                     if self.__matrix[bx*3+bx2][by*3+by2] in self.__hypo_matrix[bx*3+bx3][by*3+by3]:
                                         self.__hypo_matrix[bx*3+bx3][by*3+by3].remove(self.__matrix[bx*3+bx2][by*3+by2])
+
+class GUI():
+    def __init__(self, orig, fi, mat):
+        print(orig)
+        pygame.init()
+        self.__original = orig
+        self.__filled_in = fi
+        self.__mat = mat
+        self.__screen =  pygame.display.set_mode([825, 825])
+        pygame.display.set_caption("Sudoku solver")
+        self.__screen.fill("WHITE")
+        self.__numberFont = pygame.font.Font(("freesansbold.ttf"), 60)
+        self.__numberFontColor = (0, 0, 0)
+        self.__numberFontColor2 = (255, 0, 0)
+        self.__updateScreen()
+        self.__showResult()
+
+    def __showResult(self):
+        self.__run = True
+        self.__showGrid()
+        self.__showPrefilled()
+        self.__showFilled()
+        self.__showMatrix()
+        while self.__run:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.__run =False
+            self.__updateScreen()
+            
+
+    def __showGrid(self):
+        self.__outer_box = pygame.Rect(45, 45, 735, 735)
+        self.__drawBox(self.__outer_box, "black")
+        for col in range(3):
+            for col2 in range(3):
+                for row in range(3):
+                    for row2 in range(3):
+                        self.__inner_boxes = pygame.Rect(50+80*(col*3+col2)+(col*5), 50+80*(row*3+row2)+(row*5), 75, 75)
+                        self.__drawBox(self.__inner_boxes, "white")
+
+    def __showPrefilled(self):
+        for col in range(3):
+            for col2 in range(3):
+                for row in range(3):
+                    for row2 in range(3):
+                        self.__number_temp = str(self.__original[row*3+row2][col*3+col2])
+                        self.__numberText = self.__numberFont.render(self.__number_temp, True, self.__numberFontColor)
+                        if self.__number_temp != "0":
+                            self.__screen.blit(self.__numberText, (70+80*(col*3+col2)+(col*5), 60+80*(row*3+row2)+(row*5)))
+                            self.__updateScreen()
+        #time.sleep(0.25)
+
+    def __showFilled(self):
+        for row in range(3):
+            for row2 in range(3):
+                for col in range(3):
+                    for col2 in range(3):
+                        if self.__original[row*3+row2][col*3+col2] == 0: 
+                            self.__number_temp = str(self.__filled_in[row*3+row2][col*3+col2])
+                            self.__numberText = self.__numberFont.render(self.__number_temp, True, self.__numberFontColor2)
+                            self.__screen.blit(self.__numberText, (70+80*(col*3+col2)+(col*5), 60+80*(row*3+row2)+(row*5)))
+                            time.sleep(0.03)
+                            self.__updateScreen()
+
+    def __drawBox(self, rectd, color):
+        self.__color = color
+        self.__rectd = rectd
+        pygame.draw.rect(self.__screen, self.__color, self.__rectd)
+
+    def __showMatrix(self):
+        self.__numpFont = pygame.font.Font(("freesansbold.ttf"), 20)
+        self.__numpFontColor = (140, 140, 140)
+        for row in range(3):
+            for col in range(3):
+                for row2 in range(3):
+                    for col2 in range(3):
+                        for i in range(len(self.__mat[row*3 + row2][col*3 + col2])):
+                            self.__nump = self.__mat[row*3 + row2][col*3 + col2][i]
+                            self.__numpText = self.__numpFont.render(str(self.__nump), True, self.__numpFontColor)
+                            self.__screen.blit(self.__numpText, (60+80*(col*3+col2)+(col*5)+(((self.__nump-1)%3)*22), 57+80*(row*3+row2)+(row*5)+(((self.__nump-1)//3)*22)))
+                            self.__updateScreen()
     
+    def __updateScreen(self):
+        pygame.display.update()
+        pygame.display.flip()
+
 sd = Solve(sudoku_inp)
 sd.run()
